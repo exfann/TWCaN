@@ -1,4 +1,5 @@
 import subprocess
+import sys
 import re
 import os
 import os.path
@@ -32,17 +33,20 @@ def tweettweet(username, status_id, stat):
         #i = Image.open(BytesIO(request.content))
         #save image under given filename
         #i.save(filena
-    statusstr = '@{0}'.format(username), ' ', stat[0]
+    #statusstr = '@{0}'.format(username)+' '+stat[0]
+    statusstr = '@exfann '+stat[0]
 
     #statusstr = 'hey this is just some text im puttin out there to show that this actually works sorta woo'
     #api.update_status(status = statusstr, in_reply_to_status_id = status_id)
     api.update_with_media(stat[1], status = statusstr)
     print("sent")
+    sys.exit()
 
 #def searchy()
 
 def getlink(text):
     regex = r'https?://[^\s<>"]+|www\.[^\s<>"]+'
+    #match = re.search(r'href=[\'"]?([^\'" >]+)', text)
     match = re.search(regex, text)
     if match:
         print (match.group())
@@ -57,7 +61,10 @@ def RDC(text):
 
 def prior():
     subs2 = []
+    subs3 = []
+    ret = []
     path = '~/testbot/reports/'
+    path2 = '/home/fanne/testbot/reports/'
     all_subdirs = [d for d in os.listdir('.') if os.path.isdir(d)]
     #print all_subdirs
     latest_subdir = max(all_subdirs, key=os.path.getmtime)
@@ -68,38 +75,56 @@ def prior():
     all_subdirs = [d for d in os.listdir('.') if os.path.isdir(d)]
     latest_subdir = max(all_subdirs, key=os.path.getmtime)
     path = path+latest_subdir+'/'
+    path2 = path2+latest_subdir+'/'
     os.chdir(os.path.abspath(os.path.expanduser(path)))
     all_subdirs = [d for d in os.listdir('.') if os.path.isdir(d)]
     latest_subdir = max(all_subdirs, key=os.path.getmtime)
     path = path+latest_subdir+'/'
+    path2 = path2+latest_subdir+'/'
     os.chdir(os.path.abspath(os.path.expanduser(path)))
     all_subdirs = [d for d in os.listdir('.') if os.path.isdir(d)]
     latest_subdir = max(all_subdirs, key=os.path.getmtime)
     subs = getsubs('.')
     subs = sorted(subs)
-    #print subs
+    print subs
     for i in range(len(subs)):
         subsplit = subs[i].split('**')
         subs2.append(subsplit[1])
-    #print subs2
+        subs3.append(subsplit[2])
+    print subs2
+    print subs3
+
     mindex = min(xrange(len(subs2)), key=subs2.__getitem__)
-    #print mindex
+    print mindex
     fr = open('fault-report.txt', 'r')
     reps = fr.read()
     #print reps
     reps = reps.split('\n\n')
     #print reps
     stat = reps[mindex]
-    #print stat
+    print stat
     path = path+subs[mindex]+'/'
+    path2 = path2+subs[mindex]+'/'
+    path3  = path2
     #print path
     os.chdir(os.path.abspath(os.path.expanduser(path)))
     datfile = [f for f in os.listdir('.') if os.path.isfile(f)]
     #print datfile
     path = path+datfile[0]+'/'
+    path2 = path2+datfile[0]
     #print path
-    ret = [stat, path]
-    #print ret
+    print path2
+    #ret = [stat, path2]
+    print ret
+    im = Image.open(path2)
+    width, height = im.size
+    print width, height
+    #write the code to crop and such here remember tomorrow but sleep now kay
+    im2 = im.crop((0, 0, width, int(subs3[mindex])+100))
+    im2.save("im2.png")
+    path3 = path3+"im2.png"
+    print path3
+    ret = [stat, path3]
     return ret
 
 def getsubs(a_dir):
@@ -114,12 +139,15 @@ class Streamer(tweepy.StreamListener):
         status_id = status.id
         text = status.text
         link = getlink(text)
-        RDC(link)
-        #prior()
-        #tweettweet(username, status_id, ret)
+        if link != '':
+            RDC(link)
+            ret = prior()
+            tweettweet(username, status_id, ret)
 
-com = raw_input("Search or Stream? \n")
-com = com.upper()
+
+#com = raw_input("Search or Stream? \n")
+#com = com.upper()
+com = 'STREAM'
 
 if com == 'SEARCH':
     com2 = raw_input("enter search \n")

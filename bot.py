@@ -111,12 +111,13 @@ def prior():
         print subs
         for i in range(len(subs)):
             subsplit = subs[i].split('**')
-            subs2.append(subsplit[1])
-            subs3.append(subsplit[2])
+            subs2.append(int(subsplit[1]))
+            subs3.append(int(subsplit[2]))
         print subs2
         print subs3
 
-        mindex = min(xrange(len(subs2)), key=subs2.__getitem__)
+        #mindex = min(xrange(len(subs2)), key=subs2.__getitem__)
+        mindex = subs2.index(min(subs2))
         print mindex
         fr = open('fault-report.txt', 'r')
         reps = fr.read()
@@ -142,7 +143,7 @@ def prior():
         width, height = im.size
         print width, height
         #write the code to crop and such here remember tomorrow but sleep now kay
-        im2 = im.crop((0, 0, width, int(subs3[mindex])+100))
+        im2 = im.crop((0, 0, width, subs3[mindex]+100))
         im2.save("im2.png")
         path3 = path3+"im2.png"
         print path3
